@@ -1,0 +1,12 @@
+[submodule "Externals/cedar"]
+	path = Externals/cedar
+	url = git://github.com/pivotal/cedar.git
+[submodule "Externals/FLEX"]
+	path = Externals/FLEX
+	url = git://github.com/Flipboard/FLEX.git
+[submodule "Externals/MBProgressHUD"]
+	path = Externals/MBProgressHUD
+	url = git://github.com/jdg/MBProgressHUD.git
+[submodule "Externals/JRSwizzle"]
+	path = Externals/JRSwizzle
+	url = https://github.com/rentzsch/jrswizzle.git
