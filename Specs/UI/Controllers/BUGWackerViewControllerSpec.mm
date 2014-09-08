@@ -98,12 +98,12 @@ describe(@"BUGWackerViewController", ^{
             
             context(@"when called when the window is not visible", ^{
                 beforeEach(^{
-                    spy_on(originalKeyWindow);
+                    spy_on(originalKeyWindow.screen);
                     [BUGWackerViewController showHideDebugWindow];
                 });
                 
-                it(@"should take a screen shot of the originalKeyWindow", ^{
-                    originalKeyWindow should have_received(@selector(drawViewHierarchyInRect:afterScreenUpdates:));
+                it(@"should take a screen shot", ^{
+                    originalKeyWindow.screen should have_received(@selector(snapshotViewAfterScreenUpdates:));
                 });
                 
                 it(@"should show the debugViewController", ^{
@@ -594,15 +594,3 @@ describe(@"BUGWackerViewController", ^{
 });
 
 SPEC_END
-
-
-
-
-
-
-
-
-
-
-
-

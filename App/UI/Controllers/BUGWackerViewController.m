@@ -195,9 +195,10 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
 }
 
 - (void)captureScreenShot {
-    if ([[UIApplication sharedApplication].keyWindow respondsToSelector:@selector(drawViewHierarchyInRect:afterScreenUpdates:)]) {
-        UIGraphicsBeginImageContextWithOptions([UIApplication sharedApplication].keyWindow.frame.size, YES, 0.0);
-        if ([[UIApplication sharedApplication].keyWindow drawViewHierarchyInRect:[UIApplication sharedApplication].keyWindow.frame afterScreenUpdates:NO]) {
+    if ([[UIApplication sharedApplication].keyWindow.screen respondsToSelector:@selector(snapshotViewAfterScreenUpdates:)]) {
+        UIView *screenShotView = [[UIApplication sharedApplication].keyWindow.screen snapshotViewAfterScreenUpdates:NO];
+        UIGraphicsBeginImageContextWithOptions(screenShotView.frame.size, YES, 0.0);
+        if ([screenShotView drawViewHierarchyInRect:screenShotView.frame afterScreenUpdates:NO]) {
             CGImageRef tempCGImage = CGBitmapContextCreateImage(UIGraphicsGetCurrentContext());
             self.screenShot = [UIImage imageWithCGImage:tempCGImage];
             CGImageRelease(tempCGImage);
