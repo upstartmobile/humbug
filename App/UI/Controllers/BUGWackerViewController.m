@@ -174,12 +174,11 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
             logData = self.logFileData();
         }
     }
-    
-    NSString *descriptionText = self.storyDescriptionTextView.text;
-    if ([descriptionText isEqualToString:@""]) {
-        descriptionText = nil;
-    }
-    
+
+    NSString *descriptionText = [NSString stringWithFormat:@"%@\r\n%@\r\n\r\n%@", [self currentDateAndTime], [self appVersionInfo], self.storyDescriptionTextView.text];
+
+    self.storyDescriptionTextView.text = descriptionText;
+
     __weak __typeof(self)weakSelf = self;
     [self.trackerInterface createStoryWithStoryTitle:self.storyTitleTextView.text storyDescription:descriptionText image:imageData text:logData completion:^(BOOL success, NSError *error) {
         if (success) {
@@ -205,6 +204,18 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
         }
         UIGraphicsEndImageContext();
     }
+}
+
+- (NSString *)appVersionInfo {
+    NSDictionary *bundleInfo = [[NSBundle mainBundle] infoDictionary];
+    NSString *version = [bundleInfo objectForKey:@"CFBundleShortVersionString"];
+    NSString *buildNumber = [bundleInfo objectForKey:@"CFBundleVersion"];
+    return [NSString stringWithFormat:@"Version: %@ (%@)", version, buildNumber];
+}
+
+- (NSString *)currentDateAndTime {
+    NSString *dateAndTime = [NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
+    return [NSString stringWithFormat:@"Date: %@", dateAndTime];
 }
 
 #pragma mark - UITextViewDelegate

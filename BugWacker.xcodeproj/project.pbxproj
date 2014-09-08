@@ -19,7 +19,7 @@
 		C95A289819B138AE00535906 /* BUGDemoViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = C95A289619B138AE00535906 /* BUGDemoViewController.xib */; };
 		C95A289A19B13D3A00535906 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A2BC3319AFC96600662321 /* libz.dylib */; };
 		C9710F3719AFF69F009173DE /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A2BC3319AFC96600662321 /* libz.dylib */; };
-		C9710F3A19AFF88D009173DE /* BUGWackerViewControllerSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = C9710F3919AFF88D009173DE /* BUGWackerViewControllerSpec.mm */; };
+		C9710F3A19AFF88D009173DE /* BUGWackerViewControllerSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = C9710F3919AFF88D009173DE /* BUGWackerViewControllerSpec.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		C9710F4919B0ED3F009173DE /* UIView+Spec.m in Sources */ = {isa = PBXBuildFile; fileRef = C9710F4819B0ED3F009173DE /* UIView+Spec.m */; };
 		C9710F4D19B0F8AB009173DE /* UIAlertView+Spec.m in Sources */ = {isa = PBXBuildFile; fileRef = C9710F4C19B0F8AB009173DE /* UIAlertView+Spec.m */; };
 		C9710F5119B11BC6009173DE /* BUGPivotalTrackerInterface+Spec.m in Sources */ = {isa = PBXBuildFile; fileRef = C9710F5019B11BC6009173DE /* BUGPivotalTrackerInterface+Spec.m */; };

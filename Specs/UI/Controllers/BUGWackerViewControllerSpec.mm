@@ -325,8 +325,17 @@ describe(@"BUGWackerViewController", ^{
                     [MBProgressHUD HUDForView:controller.view] should_not be_nil;
                 });
                 
-                it(@"should file the bug", ^{
-                    controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(nil).with(nil).with(nil).with(Arguments::anything);
+                it(@"should file the bug with the entered title", ^{
+                    controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(Arguments::any([NSString class])).with(nil).with(nil).with(Arguments::anything);
+                });
+                
+                it(@"should include the date and the App version number in the description", ^{
+                    NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
+                    NSString *descriptionText;
+                    [invocation getArgument:&descriptionText atIndex:3];
+                    descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
+                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
+                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
                 });
                 
                 it(@"should dismiss the keyboard if visible", ^{
@@ -355,8 +364,18 @@ describe(@"BUGWackerViewController", ^{
                     [MBProgressHUD HUDForView:controller.view] should_not be_nil;
                 });
                 
-                it(@"should file the bug", ^{
-                    controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(storyDescription).with(nil).with(nil).with(Arguments::anything);
+                it(@"should file the bug with the entered title", ^{
+                    controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(Arguments::any([NSString class])).with(nil).with(nil).with(Arguments::anything);
+                });
+                
+                it(@"should include the entered description, date and the App version number in the description", ^{
+                    NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
+                    NSString *descriptionText;
+                    [invocation getArgument:&descriptionText atIndex:3];
+                    descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
+                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
+                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
+                    descriptionText should contain(storyDescription);
                 });
                 
                 it(@"should dismiss the keyboard if visible", ^{
@@ -382,10 +401,19 @@ describe(@"BUGWackerViewController", ^{
                     [MBProgressHUD HUDForView:controller.view] should_not be_nil;
                 });
                 
-                it(@"should file the bug", ^{
-                    controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(nil).with(nil).with(logFileData).with(Arguments::anything);
+                it(@"should file the bug with the entered title", ^{
+                    controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(Arguments::any([NSString class])).with(nil).with(logFileData).with(Arguments::anything);
                 });
                 
+                it(@"should include the date and the App version number in the description", ^{
+                    NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
+                    NSString *descriptionText;
+                    [invocation getArgument:&descriptionText atIndex:3];
+                    descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
+                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
+                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
+                });
+
                 it(@"should dismiss the keyboard if visible", ^{
                     controller.storyTitleTextView.isFirstResponder should_not be_truthy;
                 });
@@ -410,7 +438,16 @@ describe(@"BUGWackerViewController", ^{
                 });
                 
                 it(@"should file the bug", ^{
-                    controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(nil).with(Arguments::anything).with(nil).with(Arguments::anything);
+                    controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(Arguments::any([NSString class])).with(Arguments::anything).with(nil).with(Arguments::anything);
+                });
+                
+                it(@"should include the date and the App version number in the description", ^{
+                    NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
+                    NSString *descriptionText;
+                    [invocation getArgument:&descriptionText atIndex:3];
+                    descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
+                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
+                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
                 });
                 
                 it(@"should dismiss the keyboard if visible", ^{
