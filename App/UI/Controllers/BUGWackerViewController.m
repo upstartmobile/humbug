@@ -177,8 +177,6 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
 
     NSString *descriptionText = [NSString stringWithFormat:@"%@\r\n%@\r\n\r\n%@", [self currentDateAndTime], [self appVersionInfo], self.storyDescriptionTextView.text];
 
-    self.storyDescriptionTextView.text = descriptionText;
-
     __weak __typeof(self)weakSelf = self;
     [self.trackerInterface createStoryWithStoryTitle:self.storyTitleTextView.text storyDescription:descriptionText image:imageData text:logData completion:^(BOOL success, NSError *error) {
         if (success) {
