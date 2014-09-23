@@ -5,7 +5,7 @@
 //
 
 #ifdef __OBJC__
-    #import <UIKit/UIKit.h>
-    #import <Foundation/Foundation.h>
-    #import <Cedar-iOS/SpecHelper.h>
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import "SpecHelper.h"
 #endif

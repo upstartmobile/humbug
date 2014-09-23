@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C95A284F19B12F5400535906 /* Cedar-iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C95A284E19B12F5400535906 /* Cedar-iOS.framework */; };
+		C926578919D1EC2500C995E7 /* libCedar-StaticLib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A2BBD019AFBC0600662321 /* libCedar-StaticLib.a */; };
 		C95A286A19B137FB00535906 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A2B39A19AFA66100662321 /* Foundation.framework */; };
 		C95A286B19B137FB00535906 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A2B3CB19AFA9D500662321 /* CoreGraphics.framework */; };
 		C95A286C19B137FB00535906 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C9A2BC3119AFC93800662321 /* UIKit.framework */; };
@@ -143,6 +143,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		C926577C19D1EC0B00C995E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C9A2B94619AFBC0500662321 /* Cedar.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = AEEE222811DC2B0600029872;
+			remoteInfo = "Cedar-StaticLib";
+		};
 		C9A2BBC919AFBC0600662321 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = C9A2B94619AFBC0500662321 /* Cedar.xcodeproj */;
@@ -390,10 +397,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C926578919D1EC2500C995E7 /* libCedar-StaticLib.a in Frameworks */,
 				C9710F3719AFF69F009173DE /* libz.dylib in Frameworks */,
 				C9A2B40719AFAD0000662321 /* CoreGraphics.framework in Frameworks */,
 				C9A2B40519AFAD0000662321 /* UIKit.framework in Frameworks */,
-				C95A284F19B12F5400535906 /* Cedar-iOS.framework in Frameworks */,
 				C9A2B40619AFAD0000662321 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -870,6 +877,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				C926577D19D1EC0B00C995E7 /* PBXTargetDependency */,
 			);
 			name = Specs;
 			productName = Specs;
@@ -1143,6 +1151,14 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		C926577D19D1EC0B00C995E7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Cedar-StaticLib";
+			targetProxy = C926577C19D1EC0B00C995E7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXVariantGroup section */
 		C95A287019B137FB00535906 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
@@ -1296,6 +1312,11 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/Externals/cedar/source/headers/**",
+				);
 				INFOPLIST_FILE = "Specs/Specs-Info.plist";
 				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				OTHER_LDFLAGS = (
@@ -1320,6 +1341,11 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Specs/Specs-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/Externals/cedar/source/headers/**",
+				);
 				INFOPLIST_FILE = "Specs/Specs-Info.plist";
 				LIBRARY_SEARCH_PATHS = "$(BUILT_PRODUCTS_DIR)";
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
