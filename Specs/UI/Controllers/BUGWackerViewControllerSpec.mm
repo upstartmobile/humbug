@@ -7,7 +7,7 @@
 using namespace Cedar::Matchers;
 using namespace Cedar::Doubles;
 
-@interface BUGWackerViewController (PrivateSpec) <UITextViewDelegate>
+@interface BUGWackerViewController (PrivateSpec) <UITextViewDelegate, UITextFieldDelegate>
 @property (strong, nonatomic, readwrite) UIWindow *window;
 @property (weak, nonatomic, readwrite) UIWindow *originalKeyWindow;
 @property (strong, nonatomic, readwrite) BUGPivotalTrackerInterface *trackerInterface;
@@ -31,12 +31,13 @@ describe(@"BUGWackerViewController", ^{
         } copy];
         controller = [BUGWackerViewController createSharedInstanceWithLogFileData:logFileDataBlock trackerAPIToken:nil trackerProjectID:nil];
         originalKeyWindow = [UIApplication sharedApplication].keyWindow;
-        
+        [[NSUserDefaults standardUserDefaults] setObject:@"Default Name" forKey:@"bugWacker.requestorsName"];
         [BUGWackerViewController showHideDebugWindow];
     });
     
     afterEach(^{
         [[FLEXManager sharedManager] hideExplorer];
+        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"bugWacker.requestorsName"];
     });
     
     sharedExamplesFor(@"the default view configuration", ^(NSDictionary *sharedContext) {
@@ -62,6 +63,10 @@ describe(@"BUGWackerViewController", ^{
 
         it(@"should set the screen shot switch to off", ^{
             controller.attachScreenShotSwitch.on should_not be_truthy;
+        });
+        
+        it(@"should show the requestor's name", ^{
+            controller.requestorNameTextField.text should equal([[NSUserDefaults standardUserDefaults] stringForKey:@"bugWacker.requestorsName"]);
         });
     });
     
@@ -114,6 +119,53 @@ describe(@"BUGWackerViewController", ^{
         });
     });
     
+    describe(@"moving inputs from under the keyboard", ^{
+        NSUInteger keyboardHeight = 255;
+        __block NSValue *keyboardRectValue;
+        __block NSDictionary *userInfo;
+        
+        beforeEach(^{
+            keyboardRectValue = [NSValue valueWithCGRect:CGRectMake(controller.view.frame.size.height - keyboardHeight, 0, 0, keyboardHeight)];
+            userInfo = [NSDictionary dictionaryWithObject:keyboardRectValue forKey:UIKeyboardFrameEndUserInfoKey];
+            spy_on(controller.scrollView);
+        });
+        
+        describe(@"when selecting an input view", ^{
+            beforeEach(^{
+                [controller.requestorNameTextField becomeFirstResponder];
+                [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:UIKeyboardWillChangeFrameNotification object:nil userInfo:userInfo]];
+            });
+            
+            it(@"should scroll so the input remains visible", ^{
+                controller.scrollView.contentInset should equal(UIEdgeInsetsMake(0, 0, keyboardHeight, 0));
+                controller.scrollView.scrollIndicatorInsets should equal(UIEdgeInsetsMake(0, 0, keyboardHeight, 0));
+                controller.scrollView should have_received(@selector(scrollRectToVisible:animated:));
+            });
+            
+            context(@"when selecting a different input view", ^{
+                beforeEach(^{
+                    [controller.storyDescriptionTextView becomeFirstResponder];
+                });
+                
+                it(@"should scroll so the new input is visible", ^{
+                    controller.scrollView should have_received(@selector(scrollRectToVisible:animated:));
+                });
+            });
+            
+            context(@"when deselecting an input view", ^{
+                beforeEach(^{
+                    [controller.requestorNameTextField resignFirstResponder];
+                    [[NSNotificationCenter defaultCenter] postNotification:[NSNotification notificationWithName:UIKeyboardWillHideNotification object:nil userInfo:userInfo]];
+                });
+                
+                it(@"should scroll to the top", ^{
+                    controller.scrollView.contentInset should equal(UIEdgeInsetsZero);
+                    controller.scrollView.scrollIndicatorInsets should equal(UIEdgeInsetsZero);
+                });
+            });
+        });
+    });
+    
     describe(@"view configuration", ^{
         it(@"should be in a navigationController in a window that sits above all else", ^{
             [(UINavigationController *)controller.window.rootViewController topViewController] should equal(controller);
@@ -123,7 +175,11 @@ describe(@"BUGWackerViewController", ^{
         it(@"should set its title to 'Debug'", ^{
             controller.title should equal(@"Debug");
         });
-        
+
+        it(@"should have a contentView inside a scrollView", ^{
+            controller.contentView.superview should equal(controller.scrollView);
+        });
+
         it(@"should have a 'Submit' Button", ^{
             controller.navigationItem.rightBarButtonItem.title should equal(@"Submit");
         });
@@ -133,16 +189,16 @@ describe(@"BUGWackerViewController", ^{
         });
         
         it(@"should have a 'Pivotal Tracker' label textView", ^{
-            controller.trackerTitleLabel.superview should equal(controller.view);
+            controller.trackerTitleLabel.superview should equal(controller.contentView);
         });
         
         it(@"should have a 'Pivotal Tracker' label textView", ^{
-            controller.trackerTitleLabel.superview should equal(controller.view);
+            controller.trackerTitleLabel.superview should equal(controller.contentView);
         });
         
         describe(@"story title input views", ^{
             it(@"should have a textView", ^{
-                controller.storyTitleTextView.superview should equal(controller.view);
+                controller.storyTitleTextView.superview should equal(controller.contentView);
             });
             
             it(@"should be the textView's delegate", ^{
@@ -150,14 +206,14 @@ describe(@"BUGWackerViewController", ^{
             });
             
             it(@"should have 'Bug Title' as placeholder text", ^{
-                controller.storyTitlePlaceholderLabel.superview should equal(controller.view);
+                controller.storyTitlePlaceholderLabel.superview should equal(controller.contentView);
                 controller.storyTitlePlaceholderLabel.text should equal(@"Bug Title");
             });
         });
         
         describe(@"story description input views", ^{
             it(@"should have a textView", ^{
-                controller.storyDescriptionTextView.superview should equal(controller.view);
+                controller.storyDescriptionTextView.superview should equal(controller.contentView);
             });
 
             it(@"should be the textView's delegate", ^{
@@ -165,41 +221,46 @@ describe(@"BUGWackerViewController", ^{
             });
             
             it(@"should have 'Bug Description' as placeholder text", ^{
-                controller.storyDescriptionPlaceholderLabel.superview should equal(controller.view);
+                controller.storyDescriptionPlaceholderLabel.superview should equal(controller.contentView);
                 controller.storyDescriptionPlaceholderLabel.text should equal(@"Bug Description");
             });
         });
         
         describe(@"attachments", ^{
             it(@"should have an 'Attachments' label", ^{
-                controller.attachmentsLabel.superview should equal(controller.view);
+                controller.attachmentsLabel.superview should equal(controller.contentView);
             });
             
             describe(@"logs", ^{
                 it(@"should have a switch", ^{
-                    controller.attachLogsSwitch.superview should equal(controller.view);
+                    controller.attachLogsSwitch.superview should equal(controller.contentView);
                 });
                 
                 it(@"should have a 'Logs:' label", ^{
-                    controller.logsAttachmentLabel.superview should equal(controller.view);
+                    controller.logsAttachmentLabel.superview should equal(controller.contentView);
                     controller.logsAttachmentLabel.text should equal(@"Logs:");
                 });
             });
             
             describe(@"Screen Shot", ^{
                 it(@"should have a switch", ^{
-                    controller.attachScreenShotSwitch.superview should equal(controller.view);
+                    controller.attachScreenShotSwitch.superview should equal(controller.contentView);
                 });
                 
                 it(@"should have a 'Screen Shot:' label", ^{
-                    controller.screenShotAttachmentLabel.superview should equal(controller.view);
+                    controller.screenShotAttachmentLabel.superview should equal(controller.contentView);
                     controller.screenShotAttachmentLabel.text should equal(@"Screen Shot:");
                 });
             });
         });
         
         it(@"should have a 'FLEX' switch", ^{
-            controller.flexButton.superview should equal(controller.view);
+            controller.flexButton.superview should equal(controller.contentView);
+        });
+        
+        it(@"should have a requestor name label", ^{
+            controller.requestorNameTextField.superview should equal(controller.contentView);
+            controller.requestorNameTextField.placeholder should equal(@"Requestor's Name");
         });
     });
     
@@ -224,6 +285,32 @@ describe(@"BUGWackerViewController", ^{
         
         it(@"should tell the interface to cancel", ^{
             controller.trackerInterface should have_received(@selector(cancel));
+        });
+    });
+    
+    describe(@"when a requestor enters their name", ^{
+        __block NSString *requestorName;
+        
+        beforeEach(^{
+            requestorName = @"Flik";
+            controller.requestorNameTextField.text = requestorName;
+            [controller textFieldDidEndEditing:controller.requestorNameTextField];
+        });
+        
+        it(@"should persist the name so they only have to enter it once", ^{
+            [[NSUserDefaults standardUserDefaults] stringForKey:@"bugWacker.requestorsName"] should equal(requestorName);
+        });
+        
+        context(@"when the BugWackerVC is shown again", ^{
+            beforeEach(^{
+                controller = [BUGWackerViewController createSharedInstanceWithLogFileData:logFileDataBlock trackerAPIToken:nil trackerProjectID:nil];
+                originalKeyWindow = [UIApplication sharedApplication].keyWindow;
+                [BUGWackerViewController showHideDebugWindow];
+            });
+            
+            it(@"should fill in the requestor's name", ^{
+                controller.requestorNameTextField.text should equal(requestorName);
+            });
         });
     });
     
@@ -297,20 +384,57 @@ describe(@"BUGWackerViewController", ^{
                 it(@"should dismiss the alert", ^{
                     [UIAlertView currentAlertView] should be_nil;
                 });
-            });
-            
-            it(@"should dismiss the keyboard if visible", ^{
-                controller.storyTitleTextView.isFirstResponder should_not be_truthy;
+                
+                it(@"should place the cursor in the 'Bug Title' textView", ^{
+                    controller.storyTitleTextView.isFirstResponder should be_truthy;
+                });
             });
         });
         
-        context(@"when a 'Bug Title' has been added", ^{
-            __block NSString *storyTitle;
+        context(@"when a 'Requestor's Name' has not been added", ^{
+            beforeEach(^{
+                [[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"bugWacker.requestorsName"];
+                controller.requestorNameTextField.text = nil;
+                controller.storyTitleTextView.text = @"a story title";
+                #pragma clang diagnostic push
+                #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+                [controller.navigationItem.rightBarButtonItem.target performSelector:controller.navigationItem.rightBarButtonItem.action withObject:nil];
+                #pragma clang diagnostic pop
+            });
             
+            it(@"should present an alert", ^{
+                [UIAlertView currentAlertView] should_not be_nil;
+                [UIAlertView currentAlertView].title should equal(@"Requestor");
+                [UIAlertView currentAlertView].message should equal(@"Please provide your name.");
+                [[UIAlertView currentAlertView] buttonTitleAtIndex:0] should equal(@"OK");
+            });
+            
+            it(@"should place the cursor in the 'Requestor's Name' textView", ^{
+                controller.requestorNameTextField.isFirstResponder should be_truthy;
+            });
+            
+            context(@"when the 'OK' button is tapped", ^{
+                beforeEach(^{
+                    [[UIAlertView currentAlertView] dismissWithClickedButtonIndex:0 animated:NO];
+                });
+                
+                it(@"should dismiss the alert", ^{
+                    [UIAlertView currentAlertView] should be_nil;
+                });
+            });
+        });
+
+        context(@"when a 'Bug Title' and 'Requestor's Name' have been added", ^{
+            __block NSString *storyTitle;
+            __block NSString *requestorName;
+
             beforeEach(^{
                 spy_on(controller.trackerInterface);
                 storyTitle = @"A Bug's Life";
                 controller.storyTitleTextView.text = storyTitle;
+                requestorName = @"Flik";
+                controller.requestorNameTextField.text = requestorName;
+                [controller textFieldDidEndEditing:controller.requestorNameTextField];
             });
             
             context(@"and nothing else", ^{
@@ -329,13 +453,14 @@ describe(@"BUGWackerViewController", ^{
                     controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(Arguments::any([NSString class])).with(nil).with(nil).with(Arguments::anything);
                 });
                 
-                it(@"should include the date and the App version number in the description", ^{
+                it(@"should include the requestor's name, the date, and the App version number in the description", ^{
                     NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
                     NSString *descriptionText;
                     [invocation getArgument:&descriptionText atIndex:3];
                     descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
+                    descriptionText should contain(requestorName);
                 });
                 
                 it(@"should dismiss the keyboard if visible", ^{
@@ -368,13 +493,14 @@ describe(@"BUGWackerViewController", ^{
                     controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(Arguments::any([NSString class])).with(nil).with(nil).with(Arguments::anything);
                 });
                 
-                it(@"should include the entered description, date and the App version number in the description", ^{
+                it(@"should include the requestor's name, the date, and the App version number in the description", ^{
                     NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
                     NSString *descriptionText;
                     [invocation getArgument:&descriptionText atIndex:3];
                     descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
+                    descriptionText should contain(requestorName);
                     descriptionText should contain(storyDescription);
                 });
                 
@@ -405,13 +531,14 @@ describe(@"BUGWackerViewController", ^{
                     controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(Arguments::any([NSString class])).with(nil).with(logFileData).with(Arguments::anything);
                 });
                 
-                it(@"should include the date and the App version number in the description", ^{
+                it(@"should include the requestor's name, the date, and the App version number in the description", ^{
                     NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
                     NSString *descriptionText;
                     [invocation getArgument:&descriptionText atIndex:3];
                     descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
+                    descriptionText should contain(requestorName);
                 });
 
                 it(@"should dismiss the keyboard if visible", ^{
@@ -441,15 +568,16 @@ describe(@"BUGWackerViewController", ^{
                     controller.trackerInterface should have_received(@selector(createStoryWithStoryTitle:storyDescription:image:text:completion:)).with(storyTitle).with(Arguments::any([NSString class])).with(Arguments::anything).with(nil).with(Arguments::anything);
                 });
                 
-                it(@"should include the date and the App version number in the description", ^{
+                it(@"should include the requestor's name, the date, and the App version number in the description", ^{
                     NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
                     NSString *descriptionText;
                     [invocation getArgument:&descriptionText atIndex:3];
                     descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
+                    descriptionText should contain(requestorName);
                 });
-                
+
                 it(@"should dismiss the keyboard if visible", ^{
                     controller.storyTitleTextView.isFirstResponder should_not be_truthy;
                 });

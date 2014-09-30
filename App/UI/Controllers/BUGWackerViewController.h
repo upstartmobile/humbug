@@ -13,6 +13,9 @@
 @property (weak, nonatomic) IBOutlet UIButton *flexButton;
 @property (weak, nonatomic) IBOutlet UILabel *storyTitlePlaceholderLabel;
 @property (weak, nonatomic) IBOutlet UILabel *storyDescriptionPlaceholderLabel;
+@property (weak, nonatomic) IBOutlet UITextField *requestorNameTextField;
+@property (weak, nonatomic) IBOutlet UIView *contentView;
+@property (weak, nonatomic) IBOutlet UIScrollView *scrollView;
 
 + (instancetype)createSharedInstanceWithLogFileData:(NSData * (^)())logData trackerAPIToken:(NSString *)token trackerProjectID:(NSString *)projectID;
 + (instancetype)sharedInstance;

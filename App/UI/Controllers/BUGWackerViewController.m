@@ -3,7 +3,7 @@
 #import "MBProgressHUD.h"
 #import "FLEXManager.h"
 
-@interface BUGWackerViewController () <UITextViewDelegate>
+@interface BUGWackerViewController () <UITextViewDelegate, UITextFieldDelegate>
 
 @property (assign, nonatomic, readwrite) BOOL windowIsVisible;
 @property (weak, nonatomic, readwrite) UIWindow *originalKeyWindow;
@@ -12,7 +12,6 @@
 @property (strong, nonatomic, readwrite) BUGPivotalTrackerInterface *trackerInterface;
 @property (strong, nonatomic, readwrite) UINavigationController *navigationController;
 @property (copy, nonatomic) NSData * (^logFileData)();
-
 @end
 
 BUGWackerViewController  *debugViewController__;
@@ -72,6 +71,10 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
     return self;
 }
 
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     
@@ -86,22 +89,37 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
     self.storyDescriptionTextView.layer.borderColor = [self lightGreyColor].CGColor;
     self.storyDescriptionTextView.layer.borderWidth = 1;
     self.storyDescriptionTextView.layer.cornerRadius = 4;
-    
-    [self configureView];
-    [self setDefaultViewConfiguration];
-    
-    self.flexButton.titleLabel.font = [UIFont systemFontOfSize:22.0];
+
     self.flexButton.layer.borderColor = self.flexButton.tintColor.CGColor;
     self.flexButton.layer.borderWidth = 1.0f;
     self.flexButton.layer.cornerRadius = 6.0f;
     self.flexButton.backgroundColor = [UIColor whiteColor];
-    self.flexButton.titleLabel.font = [UIFont systemFontOfSize:22.f];
     
     self.view.backgroundColor = [UIColor colorWithRed:0.945 green:0.953 blue:0.957 alpha:1.0];
+    
+    [self configureTextFontAndColor];
     
     UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapGestureDidRecognize:)];
     gesture.cancelsTouchesInView = NO;
     [self.view addGestureRecognizer:gesture];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillChangeFrame:)
+                                                 name:UIKeyboardWillChangeFrameNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(keyboardWillHide:)
+                                                 name:UIKeyboardWillHideNotification
+                                               object:nil];
+    
+    [self setDefaultViewConfiguration];
+}
+
+- (void)viewDidLayoutSubviews {
+    if (self.scrollView.contentInset.top > 0) {
+        self.scrollView.contentInset = UIEdgeInsetsZero;
+    }
 }
 
 - (void)configureBarButtonItems {
@@ -109,7 +127,7 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
     [self.navigationItem.leftBarButtonItem setTitleTextAttributes:@{NSFontAttributeName: [UIFont systemFontOfSize:17.0f]} forState:UIControlStateNormal];
 }
 
-- (void)configureView {
+- (void)configureTextFontAndColor {
     self.trackerTitleLabel.font = [UIFont systemFontOfSize:19];
     self.trackerTitleLabel.textColor = [self darkGreyColor];
     
@@ -133,6 +151,11 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
     
     self.storyDescriptionPlaceholderLabel.font = [UIFont systemFontOfSize:14];
     self.storyDescriptionPlaceholderLabel.textColor = [self lightGreyColor];
+    
+    self.requestorNameTextField.font = [UIFont systemFontOfSize:14];
+    self.requestorNameTextField.textColor = [self darkGreyColor];
+    
+    self.flexButton.titleLabel.font = [UIFont systemFontOfSize:22.0];
 }
 
 - (void)setDefaultViewConfiguration {
@@ -142,6 +165,7 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
     self.storyDescriptionPlaceholderLabel.text = storyDescriptionPlaceholderText;
     self.attachLogsSwitch.on = NO;
     self.attachScreenShotSwitch.on = NO;
+    self.requestorNameTextField.text = [[NSUserDefaults standardUserDefaults] stringForKey:@"bugWacker.requestorsName"];
 }
 
 - (UIColor *)darkGreyColor {
@@ -157,9 +181,22 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
 - (BOOL)validateStory {
     if ([self.storyTitleTextView.text isEqualToString:@""]) {
         [[[UIAlertView alloc] initWithTitle:@"Bugs need names" message:@"Please add a descriptive title." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+        [self.storyTitleTextView becomeFirstResponder];
+        return NO;
+    } else if ([self.requestorNameTextField.text isEqualToString:@""]) {
+        [[[UIAlertView alloc] initWithTitle:@"Requestor" message:@"Please provide your name." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil] show];
+        [self.requestorNameTextField becomeFirstResponder];
         return NO;
     }
     return YES;
+}
+
+- (void)validateTextLenghtForTextField:(UITextView *)textView {
+    if (textView == self.storyTitleTextView && textView.text.length > 5000) {
+        textView.text = [textView.text substringToIndex:5000];
+    } else if (textView == self.storyDescriptionTextView && textView.text.length > 20000) {
+        textView.text = [textView.text substringToIndex:20000];
+    }
 }
 
 - (void)createStory {
@@ -175,7 +212,7 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
         }
     }
 
-    NSString *descriptionText = [NSString stringWithFormat:@"%@\r\n%@\r\n\r\n%@", [self currentDateAndTime], [self appVersionInfo], self.storyDescriptionTextView.text];
+    NSString *descriptionText = [NSString stringWithFormat:@"%@\r\n%@\r\n%@\r\n\r\n%@", [[NSUserDefaults standardUserDefaults] objectForKey:@"bugWacker.requestorsName"], [self currentDateAndTime], [self appVersionInfo], self.storyDescriptionTextView.text];
 
     __weak __typeof(self)weakSelf = self;
     [self.trackerInterface createStoryWithStoryTitle:self.storyTitleTextView.text storyDescription:descriptionText image:imageData text:logData completion:^(BOOL success, NSError *error) {
@@ -219,6 +256,11 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
 
 #pragma mark - UITextViewDelegate
 
+- (BOOL)textViewShouldBeginEditing:(UITextView *)textView {
+    [self.scrollView scrollRectToVisible:textView.frame animated:YES];
+    return YES;
+}
+
 - (void)textViewDidChange:(UITextView *)textView {
     if (textView == self.storyTitleTextView) {
         if ([textView.text isEqual:@""]) {
@@ -237,12 +279,64 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
     }
 }
 
-- (void)validateTextLenghtForTextField:(UITextView *)textView {
-    if (textView == self.storyTitleTextView && textView.text.length > 5000) {
-        textView.text = [textView.text substringToIndex:5000];
-    } else if (textView == self.storyDescriptionTextView && textView.text.length > 20000) {
-        textView.text = [textView.text substringToIndex:20000];
+#pragma mark - UITextFieldDelegate protocol
+
+- (BOOL)textFieldShouldBeginEditing:(UITextField *)textField {
+    [self.scrollView scrollRectToVisible:textField.frame animated:YES];
+    return YES;
+}
+
+- (void)textFieldDidEndEditing:(UITextField *)textField {
+    if (textField == self.requestorNameTextField) {
+        [[NSUserDefaults standardUserDefaults] setObject:textField.text forKey:@"bugWacker.requestorsName"];
     }
+}
+
+#pragma mark - Keyboard Handling
+
+- (void)keyboardWillChangeFrame:(NSNotification *)notification {
+    CGFloat keyboardHeight = [[[notification userInfo] objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue].size.height;
+    NSTimeInterval animationDuration = ((NSNumber *)notification.userInfo[UIKeyboardAnimationDurationUserInfoKey]).doubleValue;
+    UIViewAnimationCurve animationCurve = ((NSNumber *)notification.userInfo[UIKeyboardAnimationCurveUserInfoKey]).integerValue;
+
+    if (animationDuration <= 0) {
+        animationDuration = .25;
+    }
+
+    __weak __typeof(self)weakSelf = self;
+    [UIView animateWithDuration:animationDuration
+                          delay:0.0
+                        options:(animationCurve << 16) // From UIView.h
+                     animations:^{
+                         UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, keyboardHeight, 0.0);
+                         weakSelf.scrollView.contentInset = contentInsets;
+                         weakSelf.scrollView.scrollIndicatorInsets = contentInsets;
+                         [weakSelf.scrollView scrollRectToVisible:[weakSelf firstResponder].frame animated:NO];
+                     } completion:nil];
+}
+
+- (void)keyboardWillHide:(NSNotification *)notification {
+    NSTimeInterval animationDuration = ((NSNumber *)notification.userInfo[UIKeyboardAnimationDurationUserInfoKey]).doubleValue;
+    UIViewAnimationCurve animationCurve = ((NSNumber *)notification.userInfo[UIKeyboardAnimationCurveUserInfoKey]).integerValue;
+    __weak __typeof(self)weakSelf = self;
+    [UIView animateWithDuration:animationDuration
+                          delay:0.0
+                        options:(animationCurve << 16) // From UIView.h
+                     animations:^{
+                         UIEdgeInsets contentInsets = UIEdgeInsetsMake(0.0, 0.0, 0.0, 0.0);
+                         weakSelf.scrollView.contentInset = contentInsets;
+                         weakSelf.scrollView.scrollIndicatorInsets = contentInsets;
+                         [weakSelf.contentView layoutIfNeeded];
+                     } completion:nil];
+}
+
+- (UIView *)firstResponder {
+    for (UIView *view in self.contentView.subviews) {
+        if ([view isFirstResponder]) {
+            return view;
+        }
+    }
+    return nil;
 }
 
 #pragma mark - Target Action

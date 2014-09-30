@@ -11,4 +11,8 @@
     }
 }
 
++ (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay options:(UIViewAnimationOptions)options animations:(void (^)(void))animations completion:(void (^)(BOOL))completion {
+    [self animateWithDuration:duration animations:animations completion:completion];
+}
+
 @end
