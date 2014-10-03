@@ -457,10 +457,10 @@ describe(@"BUGWackerViewController", ^{
                     NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
                     NSString *descriptionText;
                     [invocation getArgument:&descriptionText atIndex:3];
-                    descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
-                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
+                    descriptionText should contain([NSString stringWithFormat:@"Date: %@", [NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]]);
+                    descriptionText should contain([NSString stringWithFormat:@"Version: %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
-                    descriptionText should contain(requestorName);
+                    descriptionText should contain([NSString stringWithFormat:@"Requestor: %@", requestorName]);
                 });
                 
                 it(@"should dismiss the keyboard if visible", ^{
@@ -497,10 +497,10 @@ describe(@"BUGWackerViewController", ^{
                     NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
                     NSString *descriptionText;
                     [invocation getArgument:&descriptionText atIndex:3];
-                    descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
-                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
+                    descriptionText should contain([NSString stringWithFormat:@"Date: %@", [NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]]);
+                    descriptionText should contain([NSString stringWithFormat:@"Version: %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
-                    descriptionText should contain(requestorName);
+                    descriptionText should contain([NSString stringWithFormat:@"Requestor: %@", requestorName]);
                     descriptionText should contain(storyDescription);
                 });
                 
@@ -535,10 +535,10 @@ describe(@"BUGWackerViewController", ^{
                     NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
                     NSString *descriptionText;
                     [invocation getArgument:&descriptionText atIndex:3];
-                    descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
-                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
+                    descriptionText should contain([NSString stringWithFormat:@"Date: %@", [NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]]);
+                    descriptionText should contain([NSString stringWithFormat:@"Version: %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
-                    descriptionText should contain(requestorName);
+                    descriptionText should contain([NSString stringWithFormat:@"Requestor: %@", requestorName]);
                 });
 
                 it(@"should dismiss the keyboard if visible", ^{
@@ -572,10 +572,10 @@ describe(@"BUGWackerViewController", ^{
                     NSInvocation *invocation = [(id<CedarDouble>)controller.trackerInterface sent_messages][0];
                     NSString *descriptionText;
                     [invocation getArgument:&descriptionText atIndex:3];
-                    descriptionText should contain([NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]);
-                    descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]);
+                    descriptionText should contain([NSString stringWithFormat:@"Date: %@", [NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle]]);
+                    descriptionText should contain([NSString stringWithFormat:@"Version: %@", [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"]]);
                     descriptionText should contain([[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleVersion"]);
-                    descriptionText should contain(requestorName);
+                    descriptionText should contain([NSString stringWithFormat:@"Requestor: %@", requestorName]);
                 });
 
                 it(@"should dismiss the keyboard if visible", ^{

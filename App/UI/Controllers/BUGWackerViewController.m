@@ -212,7 +212,7 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
         }
     }
 
-    NSString *descriptionText = [NSString stringWithFormat:@"%@\r\n%@\r\n%@\r\n\r\n%@", [[NSUserDefaults standardUserDefaults] objectForKey:@"bugWacker.requestorsName"], [self currentDateAndTime], [self appVersionInfo], self.storyDescriptionTextView.text];
+    NSString *descriptionText = [NSString stringWithFormat:@"%@\r\n%@\r\n%@\r\n\r\n%@", [self requestorName], [self currentDateAndTime], [self appVersionInfo], self.storyDescriptionTextView.text];
 
     __weak __typeof(self)weakSelf = self;
     [self.trackerInterface createStoryWithStoryTitle:self.storyTitleTextView.text storyDescription:descriptionText image:imageData text:logData completion:^(BOOL success, NSError *error) {
@@ -252,6 +252,10 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
 - (NSString *)currentDateAndTime {
     NSString *dateAndTime = [NSDateFormatter localizedStringFromDate:[NSDate date] dateStyle:NSDateFormatterShortStyle timeStyle:NSDateFormatterShortStyle];
     return [NSString stringWithFormat:@"Date: %@", dateAndTime];
+}
+
+- (NSString *)requestorName {
+    return [NSString stringWithFormat:@"Requestor: %@", [[NSUserDefaults standardUserDefaults] objectForKey:@"bugWacker.requestorsName"]];
 }
 
 #pragma mark - UITextViewDelegate
