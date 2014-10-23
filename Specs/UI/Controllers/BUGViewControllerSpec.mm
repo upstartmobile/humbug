@@ -103,12 +103,12 @@ describe(@"BUGViewController", ^{
             
             context(@"when called when the window is not visible", ^{
                 beforeEach(^{
-                    spy_on(originalKeyWindow.screen);
+                    spy_on(originalKeyWindow);
                     [BUGViewController showHideDebugWindow];
                 });
                 
                 it(@"should take a screen shot", ^{
-                    originalKeyWindow.screen should have_received(@selector(snapshotViewAfterScreenUpdates:));
+                    originalKeyWindow should have_received(@selector(drawViewHierarchyInRect:afterScreenUpdates:));
                 });
                 
                 it(@"should show the debugViewController", ^{
