@@ -1,5 +1,8 @@
 #import "BUGDemoViewController.h"
+
+#ifdef DEBUG
 #import "BUGViewController.h"
+#endif
 
 @interface BUGDemoViewController ()
 
@@ -8,8 +11,11 @@
 @implementation BUGDemoViewController
 
 - (IBAction)didTapShowDebugView:(id)sender {
-    [BUGViewController createSharedInstanceWithLogFileData:nil trackerAPIToken:nil trackerProjectID:nil];
+    
+#ifdef DEBUG
     [BUGViewController showHideDebugWindow];
+#endif
+    
 }
 
 @end
