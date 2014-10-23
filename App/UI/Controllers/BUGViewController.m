@@ -1,9 +1,9 @@
-#import "BUGWackerViewController.h"
+#import "BUGViewController.h"
 #import "BUGPivotalTrackerInterface.h"
 #import "MBProgressHUD.h"
 #import "FLEXManager.h"
 
-@interface BUGWackerViewController () <UITextViewDelegate, UITextFieldDelegate>
+@interface BUGViewController () <UITextViewDelegate, UITextFieldDelegate>
 
 @property (assign, nonatomic, readwrite) BOOL windowIsVisible;
 @property (weak, nonatomic, readwrite) UIWindow *originalKeyWindow;
@@ -14,9 +14,9 @@
 @property (copy, nonatomic) NSData * (^logFileData)();
 @end
 
-BUGWackerViewController  *debugViewController__;
+BUGViewController  *debugViewController__;
 
-@implementation BUGWackerViewController
+@implementation BUGViewController
 
 static NSString *storyTitlePlaceholderText = @"Bug Title";
 static NSString *storyDescriptionPlaceholderText = @"Bug Description";
@@ -45,12 +45,12 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
 }
 
 + (instancetype)createSharedInstanceWithLogFileData:(NSData * (^)())logData trackerAPIToken:(NSString *)token trackerProjectID:(NSString *)projectID {
-    return debugViewController__ = [[BUGWackerViewController alloc] initWithLogFileData:logData trackerAPIToken:token trackerProjectID:projectID];
+    return debugViewController__ = [[BUGViewController alloc] initWithLogFileData:logData trackerAPIToken:token trackerProjectID:projectID];
 }
 
 + (instancetype)sharedInstance {
     if (!debugViewController__) {
-        [NSException raise:@"BugWackerViewController" format:@"The BugWackerViewController must first be created with createSharedInstanceWithLogFileData:trackerAPIToken:trackerProjectID:"];
+        [NSException raise:@"BUGViewController" format:@"The BUGViewController must first be created with createSharedInstanceWithLogFileData:trackerAPIToken:trackerProjectID:"];
     }
     return debugViewController__;
 }
@@ -165,7 +165,7 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
     self.storyDescriptionPlaceholderLabel.text = storyDescriptionPlaceholderText;
     self.attachLogsSwitch.on = NO;
     self.attachScreenShotSwitch.on = NO;
-    self.requestorNameTextField.text = [[NSUserDefaults standardUserDefaults] stringForKey:@"bugWacker.requestorsName"];
+    self.requestorNameTextField.text = [[NSUserDefaults standardUserDefaults] stringForKey:@"humbug.requestorsName"];
 }
 
 - (UIColor *)darkGreyColor {
@@ -220,7 +220,7 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
             [weakSelf setDefaultViewConfiguration];
             hud.labelText = @"Success";
             if (self.windowIsVisible) {
-                [BUGWackerViewController showHideDebugWindow];
+                [BUGViewController showHideDebugWindow];
             }
         } else {
             hud.labelText = @"Failed";
@@ -255,7 +255,7 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
 }
 
 - (NSString *)requestorName {
-    return [NSString stringWithFormat:@"Requestor: %@", [[NSUserDefaults standardUserDefaults] objectForKey:@"bugWacker.requestorsName"]];
+    return [NSString stringWithFormat:@"Requestor: %@", [[NSUserDefaults standardUserDefaults] objectForKey:@"humbug.requestorsName"]];
 }
 
 #pragma mark - UITextViewDelegate
@@ -292,7 +292,7 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
 
 - (void)textFieldDidEndEditing:(UITextField *)textField {
     if (textField == self.requestorNameTextField) {
-        [[NSUserDefaults standardUserDefaults] setObject:textField.text forKey:@"bugWacker.requestorsName"];
+        [[NSUserDefaults standardUserDefaults] setObject:textField.text forKey:@"humbug.requestorsName"];
     }
 }
 
@@ -354,7 +354,7 @@ static NSString *storyDescriptionPlaceholderText = @"Bug Description";
 
 - (void)didTapCancelButton {
     [self.view endEditing:YES];
-    [BUGWackerViewController showHideDebugWindow];
+    [BUGViewController showHideDebugWindow];
     [self setDefaultViewConfiguration];
     [self.trackerInterface cancel];
 }

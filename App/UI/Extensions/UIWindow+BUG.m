@@ -1,10 +1,10 @@
-#import "BUGWackerViewController.h"
+#import "BUGViewController.h"
 
 @implementation UIWindow (BUG)
 
 - (void)motionEnded:(UIEventSubtype)motion withEvent:(UIEvent *)event {
     if (event.type == UIEventTypeMotion && event.subtype == UIEventSubtypeMotionShake) {
-        [BUGWackerViewController showHideDebugWindow];
+        [BUGViewController showHideDebugWindow];
     }
 }
 

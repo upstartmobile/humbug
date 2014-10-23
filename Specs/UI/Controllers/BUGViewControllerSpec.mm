@@ -1,4 +1,4 @@
-#import "BUGWackerViewController.h"
+#import "BUGViewController.h"
 #import "UIAlertView+Spec.h"
 #import "BUGPivotalTrackerInterface+Spec.h"
 #import "MBProgressHUD.h"
@@ -7,17 +7,17 @@
 using namespace Cedar::Matchers;
 using namespace Cedar::Doubles;
 
-@interface BUGWackerViewController (PrivateSpec) <UITextViewDelegate, UITextFieldDelegate>
+@interface BUGViewController (PrivateSpec) <UITextViewDelegate, UITextFieldDelegate>
 @property (strong, nonatomic, readwrite) UIWindow *window;
 @property (weak, nonatomic, readwrite) UIWindow *originalKeyWindow;
 @property (strong, nonatomic, readwrite) BUGPivotalTrackerInterface *trackerInterface;
 - (void)tapGestureDidRecognize:(UITapGestureRecognizer *)recognizer;
 @end
 
-SPEC_BEGIN(BUGDebugViewControllerSpec)
+SPEC_BEGIN(BUGViewControllerSpec)
 
-describe(@"BUGWackerViewController", ^{
-    __block BUGWackerViewController *controller;
+describe(@"BUGViewController", ^{
+    __block BUGViewController *controller;
     __block NSData * (^logFileDataBlock)();
     __block NSData *logFileData;
     __block BOOL blockCalled;
@@ -29,15 +29,15 @@ describe(@"BUGWackerViewController", ^{
             blockCalled = YES;
             return logFileData;
         } copy];
-        controller = [BUGWackerViewController createSharedInstanceWithLogFileData:logFileDataBlock trackerAPIToken:nil trackerProjectID:nil];
+        controller = [BUGViewController createSharedInstanceWithLogFileData:logFileDataBlock trackerAPIToken:nil trackerProjectID:nil];
         originalKeyWindow = [UIApplication sharedApplication].keyWindow;
-        [[NSUserDefaults standardUserDefaults] setObject:@"Default Name" forKey:@"bugWacker.requestorsName"];
-        [BUGWackerViewController showHideDebugWindow];
+        [[NSUserDefaults standardUserDefaults] setObject:@"Default Name" forKey:@"humbug.requestorsName"];
+        [BUGViewController showHideDebugWindow];
     });
     
     afterEach(^{
         [[FLEXManager sharedManager] hideExplorer];
-        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"bugWacker.requestorsName"];
+        [[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"humbug.requestorsName"];
     });
     
     sharedExamplesFor(@"the default view configuration", ^(NSDictionary *sharedContext) {
@@ -66,15 +66,15 @@ describe(@"BUGWackerViewController", ^{
         });
         
         it(@"should show the requestor's name", ^{
-            controller.requestorNameTextField.text should equal([[NSUserDefaults standardUserDefaults] stringForKey:@"bugWacker.requestorsName"]);
+            controller.requestorNameTextField.text should equal([[NSUserDefaults standardUserDefaults] stringForKey:@"humbug.requestorsName"]);
         });
     });
     
     describe(@"sharedInstance", ^{
-        __block BUGWackerViewController *controller;
+        __block BUGViewController *controller;
 
         beforeEach(^{
-            controller = [BUGWackerViewController sharedInstance];
+            controller = [BUGViewController sharedInstance];
         });
 
         it(@"should return the DebugViewController singleton", ^{
@@ -90,7 +90,7 @@ describe(@"BUGWackerViewController", ^{
                 originalKeyWindow should_not equal(controller.window);
                 controller.window.isHidden should_not be_truthy;
                 [UIApplication sharedApplication].keyWindow should equal(controller.window);
-                [BUGWackerViewController showHideDebugWindow];
+                [BUGViewController showHideDebugWindow];
             });
             
             it(@"should hide the DegubViewController", ^{
@@ -104,7 +104,7 @@ describe(@"BUGWackerViewController", ^{
             context(@"when called when the window is not visible", ^{
                 beforeEach(^{
                     spy_on(originalKeyWindow.screen);
-                    [BUGWackerViewController showHideDebugWindow];
+                    [BUGViewController showHideDebugWindow];
                 });
                 
                 it(@"should take a screen shot", ^{
@@ -298,14 +298,14 @@ describe(@"BUGWackerViewController", ^{
         });
         
         it(@"should persist the name so they only have to enter it once", ^{
-            [[NSUserDefaults standardUserDefaults] stringForKey:@"bugWacker.requestorsName"] should equal(requestorName);
+            [[NSUserDefaults standardUserDefaults] stringForKey:@"humbug.requestorsName"] should equal(requestorName);
         });
         
-        context(@"when the BugWackerVC is shown again", ^{
+        context(@"when the BugVC is shown again", ^{
             beforeEach(^{
-                controller = [BUGWackerViewController createSharedInstanceWithLogFileData:logFileDataBlock trackerAPIToken:nil trackerProjectID:nil];
+                controller = [BUGViewController createSharedInstanceWithLogFileData:logFileDataBlock trackerAPIToken:nil trackerProjectID:nil];
                 originalKeyWindow = [UIApplication sharedApplication].keyWindow;
-                [BUGWackerViewController showHideDebugWindow];
+                [BUGViewController showHideDebugWindow];
             });
             
             it(@"should fill in the requestor's name", ^{
@@ -393,7 +393,7 @@ describe(@"BUGWackerViewController", ^{
         
         context(@"when a 'Requestor's Name' has not been added", ^{
             beforeEach(^{
-                [[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"bugWacker.requestorsName"];
+                [[NSUserDefaults standardUserDefaults] setObject:nil forKey:@"humbug.requestorsName"];
                 controller.requestorNameTextField.text = nil;
                 controller.storyTitleTextView.text = @"a story title";
                 #pragma clang diagnostic push

@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 
-@interface BUGWackerViewController : UIViewController
+@interface BUGViewController : UIViewController
 
 @property (weak, nonatomic) IBOutlet UILabel *trackerTitleLabel;
 @property (weak, nonatomic) IBOutlet UITextView *storyTitleTextView;
