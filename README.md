@@ -26,13 +26,13 @@ humbug should only be included in non-AppStore builds as FLEX will cause an AppS
 
 ```objc
 #ifdef DEBUG
-	#import "BUGWackerViewController.h"
+	#import "BUGViewController.h"
 	#import "DDFileLogger.h"
 #endif
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     #ifdef DEBUG
-    [BUGWackerViewController createSharedInstanceWithLogFileData:^NSData *{
+    [BUGViewController createSharedInstanceWithLogFileData:^NSData *{
         DDFileLogger *fileLogger;
         for (id logger in Flywheel.sharedInstance.loggers) {
             if ([logger isKindOfClass:[DDFileLogger class]]) {
