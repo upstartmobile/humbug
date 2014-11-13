@@ -58,7 +58,6 @@ Pull requests welcome. Please add tests where appropriate.
 
 ### Maintainers
 * [Matt Edmonds](mailto:matthewedmonds@me.com) ([github](https://github.com/medmonds)), Flywheel, San Francisco
-* [Joshua Marker](mailto:joshua@nowhereville.org) ([github](https://github.com/tooluser)), Flywheel, San Francisco
 
 ### Dependencies
 
